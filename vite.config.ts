@@ -7,8 +7,8 @@ import {VitePWA} from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
- base: './',   plugins: [
-      react(),
+
+  base: '/RouterCraft/',    react(),
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
