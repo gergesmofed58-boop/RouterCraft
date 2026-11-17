@@ -1,0 +1,8 @@
+{
+  "name": "راوتر برو — التحكم الكامل في الواي فاي",
+  "description": "لوحة تحكم متكاملة لإدارة شبكة الواي فاي والراوتر، تقسيم السرعة والجيجات على المشتركين، مراقبة استهلاك الأجهزة، وحظر المتطفلين مع إشعارات فورية.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

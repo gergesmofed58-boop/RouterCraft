@@ -1,0 +1,736 @@
+{
+  "entities": {
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "User workspace preferences without PII.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display label for the administrator.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "notificationsEnabled": {
+          "type": "boolean",
+          "description": "Whether instant new-device alerts are active."
+        },
+        "soundAlerts": {
+          "type": "boolean",
+          "description": "Whether audible chime plays on new-device detection."
+        },
+        "activeRouterId": {
+          "type": "string",
+          "description": "Currently selected router document ID.",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]*$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "displayName",
+        "notificationsEnabled",
+        "soundAlerts",
+        "activeRouterId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "RouterProfile": {
+      "title": "RouterProfile",
+      "description": "Managed Wi-Fi & VDSL/Fiber router configuration and telemetry.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "brandModel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "gatewayIp": {
+          "type": "string",
+          "minLength": 7,
+          "maxLength": 45
+        },
+        "wanDownloadMbps": {
+          "type": "number"
+        },
+        "wanUploadMbps": {
+          "type": "number"
+        },
+        "monthlyQuotaGb": {
+          "type": "number"
+        },
+        "usedQuotaGb": {
+          "type": "number"
+        },
+        "billingDay": {
+          "type": "number"
+        },
+        "wifi24Enabled": {
+          "type": "boolean"
+        },
+        "wifi24Ssid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "wifi24Channel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        },
+        "wifi24Hidden": {
+          "type": "boolean"
+        },
+        "wifi5Enabled": {
+          "type": "boolean"
+        },
+        "wifi5Ssid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "wifi5Channel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16
+        },
+        "wifi5Hidden": {
+          "type": "boolean"
+        },
+        "guestEnabled": {
+          "type": "boolean"
+        },
+        "guestSsid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "guestSpeedLimitMbps": {
+          "type": "number"
+        },
+        "txPowerPercent": {
+          "type": "number"
+        },
+        "securityMode": {
+          "type": "string",
+          "enum": ["WPA3-SAE", "WPA2/WPA3", "WPA2-PSK"]
+        },
+        "dnsPrimary": {
+          "type": "string",
+          "minLength": 7,
+          "maxLength": 45
+        },
+        "dnsSecondary": {
+          "type": "string",
+          "minLength": 7,
+          "maxLength": 45
+        },
+        "wpsEnabled": {
+          "type": "boolean"
+        },
+        "qosMode": {
+          "type": "string",
+          "enum": ["fair", "gaming", "streaming", "custom"]
+        },
+        "newDeviceAlert": {
+          "type": "boolean"
+        },
+        "autoBlockUnknown": {
+          "type": "boolean"
+        },
+        "lineAttenuationDown": {
+          "type": "number"
+        },
+        "snrMarginDown": {
+          "type": "number"
+        },
+        "uptimeSeconds": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "brandModel",
+        "gatewayIp",
+        "wanDownloadMbps",
+        "wanUploadMbps",
+        "monthlyQuotaGb",
+        "usedQuotaGb",
+        "billingDay",
+        "wifi24Enabled",
+        "wifi24Ssid",
+        "wifi24Channel",
+        "wifi24Hidden",
+        "wifi5Enabled",
+        "wifi5Ssid",
+        "wifi5Channel",
+        "wifi5Hidden",
+        "guestEnabled",
+        "guestSsid",
+        "guestSpeedLimitMbps",
+        "txPowerPercent",
+        "securityMode",
+        "dnsPrimary",
+        "dnsSecondary",
+        "wpsEnabled",
+        "qosMode",
+        "newDeviceAlert",
+        "autoBlockUnknown",
+        "lineAttenuationDown",
+        "snrMarginDown",
+        "uptimeSeconds",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SubscriberGroup": {
+      "title": "SubscriberGroup",
+      "description": "Subscriber or household quota and speed allocation group.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "routerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "speedLimitMbps": {
+          "type": "number"
+        },
+        "uploadLimitMbps": {
+          "type": "number"
+        },
+        "quotaLimitGb": {
+          "type": "number"
+        },
+        "usedGb": {
+          "type": "number"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["high", "normal", "low"]
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "scheduleEnabled": {
+          "type": "boolean"
+        },
+        "scheduleStart": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "scheduleEnd": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "routerId",
+        "name",
+        "speedLimitMbps",
+        "uploadLimitMbps",
+        "quotaLimitGb",
+        "usedGb",
+        "priority",
+        "paused",
+        "scheduleEnabled",
+        "scheduleStart",
+        "scheduleEnd",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "NetworkDevice": {
+      "title": "NetworkDevice",
+      "description": "Device connected to or known by the managed router.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "routerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "subscriberId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "hostname": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "macAddress": {
+          "type": "string",
+          "minLength": 17,
+          "maxLength": 17,
+          "pattern": "^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$"
+        },
+        "ipAddress": {
+          "type": "string",
+          "minLength": 7,
+          "maxLength": 45
+        },
+        "vendor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "deviceType": {
+          "type": "string",
+          "enum": ["phone", "laptop", "tv", "console", "iot", "tablet", "other"]
+        },
+        "band": {
+          "type": "string",
+          "enum": ["2.4GHz", "5GHz", "LAN"]
+        },
+        "rssi": {
+          "type": "number"
+        },
+        "online": {
+          "type": "boolean"
+        },
+        "blocked": {
+          "type": "boolean"
+        },
+        "trusted": {
+          "type": "boolean"
+        },
+        "speedLimitDownMbps": {
+          "type": "number"
+        },
+        "speedLimitUpMbps": {
+          "type": "number"
+        },
+        "quotaLimitGb": {
+          "type": "number"
+        },
+        "usedGb": {
+          "type": "number"
+        },
+        "currentDownMbps": {
+          "type": "number"
+        },
+        "currentUpMbps": {
+          "type": "number"
+        },
+        "lastSeenAt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "firstSeenAt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "routerId",
+        "subscriberId",
+        "name",
+        "hostname",
+        "macAddress",
+        "ipAddress",
+        "vendor",
+        "deviceType",
+        "band",
+        "rssi",
+        "online",
+        "blocked",
+        "trusted",
+        "speedLimitDownMbps",
+        "speedLimitUpMbps",
+        "quotaLimitGb",
+        "usedGb",
+        "currentDownMbps",
+        "currentUpMbps",
+        "lastSeenAt",
+        "firstSeenAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "NetworkAlert": {
+      "title": "NetworkAlert",
+      "description": "Security, new-device, parental, and quota alerts for a managed router.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "routerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "new_device",
+            "quota_warning",
+            "quota_exceeded",
+            "device_blocked",
+            "speed_throttled",
+            "security",
+            "parental_blocked"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "deviceId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]*$"
+        },
+        "macAddress": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 24
+        },
+        "ipAddress": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 45
+        },
+        "read": {
+          "type": "boolean"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "critical"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "routerId",
+        "type",
+        "title",
+        "message",
+        "deviceId",
+        "macAddress",
+        "ipAddress",
+        "read",
+        "severity",
+        "createdAt"
+      ]
+    },
+    "ParentalRule": {
+      "title": "ParentalRule",
+      "description": "Adult site blocking, SafeSearch, category filtering, and bedtime parental rules.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "routerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "targetType": {
+          "type": "string",
+          "enum": ["router", "subscriber", "device"]
+        },
+        "targetId": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]*$"
+        },
+        "targetName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "blockAdultContent": {
+          "type": "boolean"
+        },
+        "safeSearchEnabled": {
+          "type": "boolean"
+        },
+        "blockGambling": {
+          "type": "boolean"
+        },
+        "blockSocialMedia": {
+          "type": "boolean"
+        },
+        "blockGaming": {
+          "type": "boolean"
+        },
+        "scheduleEnabled": {
+          "type": "boolean"
+        },
+        "bedtimeStart": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "bedtimeEnd": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 5,
+          "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+        },
+        "customBlockedDomains": {
+          "type": "array",
+          "description": "Custom blocked domains list (max 30)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "routerId",
+        "targetType",
+        "targetId",
+        "targetName",
+        "blockAdultContent",
+        "safeSearchEnabled",
+        "blockGambling",
+        "blockSocialMedia",
+        "blockGaming",
+        "scheduleEnabled",
+        "bedtimeStart",
+        "bedtimeEnd",
+        "customBlockedDomains",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DomainActivityLog": {
+      "title": "DomainActivityLog",
+      "description": "Visited or blocked domains/sites recorded per connected device.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "routerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "deviceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "deviceName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 120
+        },
+        "category": {
+          "type": "string",
+          "enum": ["video", "social", "work", "gaming", "education", "adult", "shopping", "other"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["allowed", "blocked"]
+        },
+        "requestsCount": {
+          "type": "number"
+        },
+        "dataUsedMb": {
+          "type": "number"
+        },
+        "lastVisitedAt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "routerId",
+        "deviceId",
+        "deviceName",
+        "domain",
+        "category",
+        "status",
+        "requestsCount",
+        "dataUsedMb",
+        "lastVisitedAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/userSettings/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserSettings"
+      },
+      "description": "Per-user application preferences and active router pointer."
+    },
+    "/routers/{routerId}": {
+      "schema": {
+        "$ref": "#/entities/RouterProfile"
+      },
+      "description": "Owned router configurations and WAN/Wi-Fi settings."
+    },
+    "/routers/{routerId}/subscribers/{subscriberId}": {
+      "schema": {
+        "$ref": "#/entities/SubscriberGroup"
+      },
+      "description": "Subscriber bandwidth and gigabyte quota allocations under a router."
+    },
+    "/routers/{routerId}/devices/{deviceId}": {
+      "schema": {
+        "$ref": "#/entities/NetworkDevice"
+      },
+      "description": "Connected and known devices under a router."
+    },
+    "/routers/{routerId}/alerts/{alertId}": {
+      "schema": {
+        "$ref": "#/entities/NetworkAlert"
+      },
+      "description": "New-device, parental block, and quota alert log entries under a router."
+    },
+    "/routers/{routerId}/parentalRules/{ruleId}": {
+      "schema": {
+        "$ref": "#/entities/ParentalRule"
+      },
+      "description": "Parental control, adult content blocking, and custom domain filtering policies."
+    },
+    "/routers/{routerId}/domainLogs/{logId}": {
+      "schema": {
+        "$ref": "#/entities/DomainActivityLog"
+      },
+      "description": "Per-device visited and blocked website/domain telemetry logs."
+    }
+  }
+}

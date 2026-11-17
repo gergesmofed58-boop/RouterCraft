@@ -1,0 +1,13 @@
+{
+  "appId": "com.routercraft.wifi",
+  "appName": "RouterCraft",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0f172a"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

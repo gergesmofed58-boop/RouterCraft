@@ -1,0 +1,493 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Global Hardened Primitives ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwnerUid(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidMac(mac) {
+      return mac is string && mac.size() == 17 && mac.matches('^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$');
+    }
+
+    function isValidTimeHHMM(val) {
+      return val is string && val.size() == 5 && val.matches('^([01]\\d|2[0-3]):[0-5]\\d$');
+    }
+
+    function isValidOptionalId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]*$');
+    }
+
+    // --- Validation Blueprints ---
+    function isValidUserSettings(data) {
+      return data.keys().hasAll([
+        'ownerId', 'displayName', 'notificationsEnabled', 'soundAlerts',
+        'activeRouterId', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'displayName', 'notificationsEnabled', 'soundAlerts',
+        'activeRouterId', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+      data.notificationsEnabled is bool &&
+      data.soundAlerts is bool &&
+      isValidOptionalId(data.activeRouterId) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidRouterProfile(data) {
+      return data.keys().hasAll([
+        'ownerId', 'name', 'brandModel', 'gatewayIp',
+        'wanDownloadMbps', 'wanUploadMbps', 'monthlyQuotaGb', 'usedQuotaGb', 'billingDay',
+        'wifi24Enabled', 'wifi24Ssid', 'wifi24Channel', 'wifi24Hidden',
+        'wifi5Enabled', 'wifi5Ssid', 'wifi5Channel', 'wifi5Hidden',
+        'guestEnabled', 'guestSsid', 'guestSpeedLimitMbps',
+        'txPowerPercent', 'securityMode', 'dnsPrimary', 'dnsSecondary',
+        'wpsEnabled', 'qosMode', 'newDeviceAlert', 'autoBlockUnknown',
+        'lineAttenuationDown', 'snrMarginDown', 'uptimeSeconds',
+        'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'name', 'brandModel', 'gatewayIp',
+        'wanDownloadMbps', 'wanUploadMbps', 'monthlyQuotaGb', 'usedQuotaGb', 'billingDay',
+        'wifi24Enabled', 'wifi24Ssid', 'wifi24Channel', 'wifi24Hidden',
+        'wifi5Enabled', 'wifi5Ssid', 'wifi5Channel', 'wifi5Hidden',
+        'guestEnabled', 'guestSsid', 'guestSpeedLimitMbps',
+        'txPowerPercent', 'securityMode', 'dnsPrimary', 'dnsSecondary',
+        'wpsEnabled', 'qosMode', 'newDeviceAlert', 'autoBlockUnknown',
+        'lineAttenuationDown', 'snrMarginDown', 'uptimeSeconds',
+        'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+      data.brandModel is string && data.brandModel.size() >= 1 && data.brandModel.size() <= 80 &&
+      data.gatewayIp is string && data.gatewayIp.size() >= 7 && data.gatewayIp.size() <= 45 &&
+      data.wanDownloadMbps is number && data.wanDownloadMbps >= 1 && data.wanDownloadMbps <= 10000 &&
+      data.wanUploadMbps is number && data.wanUploadMbps >= 1 && data.wanUploadMbps <= 10000 &&
+      data.monthlyQuotaGb is number && data.monthlyQuotaGb >= 1 && data.monthlyQuotaGb <= 100000 &&
+      data.usedQuotaGb is number && data.usedQuotaGb >= 0 && data.usedQuotaGb <= 100000 &&
+      data.billingDay is number && data.billingDay >= 1 && data.billingDay <= 31 &&
+      data.wifi24Enabled is bool &&
+      data.wifi24Ssid is string && data.wifi24Ssid.size() >= 1 && data.wifi24Ssid.size() <= 32 &&
+      data.wifi24Channel is string && data.wifi24Channel.size() >= 1 && data.wifi24Channel.size() <= 16 &&
+      data.wifi24Hidden is bool &&
+      data.wifi5Enabled is bool &&
+      data.wifi5Ssid is string && data.wifi5Ssid.size() >= 1 && data.wifi5Ssid.size() <= 32 &&
+      data.wifi5Channel is string && data.wifi5Channel.size() >= 1 && data.wifi5Channel.size() <= 16 &&
+      data.wifi5Hidden is bool &&
+      data.guestEnabled is bool &&
+      data.guestSsid is string && data.guestSsid.size() >= 1 && data.guestSsid.size() <= 32 &&
+      data.guestSpeedLimitMbps is number && data.guestSpeedLimitMbps >= 1 && data.guestSpeedLimitMbps <= 10000 &&
+      data.txPowerPercent is number && data.txPowerPercent in [25, 50, 75, 100] &&
+      data.securityMode in ['WPA3-SAE', 'WPA2/WPA3', 'WPA2-PSK'] &&
+      data.dnsPrimary is string && data.dnsPrimary.size() >= 7 && data.dnsPrimary.size() <= 45 &&
+      data.dnsSecondary is string && data.dnsSecondary.size() >= 7 && data.dnsSecondary.size() <= 45 &&
+      data.wpsEnabled is bool &&
+      data.qosMode in ['fair', 'gaming', 'streaming', 'custom'] &&
+      data.newDeviceAlert is bool &&
+      data.autoBlockUnknown is bool &&
+      data.lineAttenuationDown is number && data.lineAttenuationDown >= 0 && data.lineAttenuationDown <= 100 &&
+      data.snrMarginDown is number && data.snrMarginDown >= 0 && data.snrMarginDown <= 100 &&
+      data.uptimeSeconds is number && data.uptimeSeconds >= 0 && data.uptimeSeconds <= 100000000 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidSubscriberGroup(data, expectedRouterId) {
+      return data.keys().hasAll([
+        'ownerId', 'routerId', 'name', 'speedLimitMbps', 'uploadLimitMbps',
+        'quotaLimitGb', 'usedGb', 'priority', 'paused',
+        'scheduleEnabled', 'scheduleStart', 'scheduleEnd',
+        'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'routerId', 'name', 'speedLimitMbps', 'uploadLimitMbps',
+        'quotaLimitGb', 'usedGb', 'priority', 'paused',
+        'scheduleEnabled', 'scheduleStart', 'scheduleEnd',
+        'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.routerId) &&
+      data.routerId == expectedRouterId &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 60 &&
+      data.speedLimitMbps is number && data.speedLimitMbps >= 0 && data.speedLimitMbps <= 10000 &&
+      data.uploadLimitMbps is number && data.uploadLimitMbps >= 0 && data.uploadLimitMbps <= 10000 &&
+      data.quotaLimitGb is number && data.quotaLimitGb >= 0 && data.quotaLimitGb <= 100000 &&
+      data.usedGb is number && data.usedGb >= 0 && data.usedGb <= 100000 &&
+      data.priority in ['high', 'normal', 'low'] &&
+      data.paused is bool &&
+      data.scheduleEnabled is bool &&
+      isValidTimeHHMM(data.scheduleStart) &&
+      isValidTimeHHMM(data.scheduleEnd) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidNetworkDevice(data, expectedRouterId) {
+      return data.keys().hasAll([
+        'ownerId', 'routerId', 'subscriberId', 'name', 'hostname', 'macAddress',
+        'ipAddress', 'vendor', 'deviceType', 'band', 'rssi', 'online', 'blocked',
+        'trusted', 'speedLimitDownMbps', 'speedLimitUpMbps', 'quotaLimitGb', 'usedGb',
+        'currentDownMbps', 'currentUpMbps', 'lastSeenAt', 'firstSeenAt',
+        'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'routerId', 'subscriberId', 'name', 'hostname', 'macAddress',
+        'ipAddress', 'vendor', 'deviceType', 'band', 'rssi', 'online', 'blocked',
+        'trusted', 'speedLimitDownMbps', 'speedLimitUpMbps', 'quotaLimitGb', 'usedGb',
+        'currentDownMbps', 'currentUpMbps', 'lastSeenAt', 'firstSeenAt',
+        'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.routerId) &&
+      data.routerId == expectedRouterId &&
+      isValidOptionalId(data.subscriberId) &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+      data.hostname is string && data.hostname.size() >= 1 && data.hostname.size() <= 80 &&
+      isValidMac(data.macAddress) &&
+      data.ipAddress is string && data.ipAddress.size() >= 7 && data.ipAddress.size() <= 45 &&
+      data.vendor is string && data.vendor.size() >= 1 && data.vendor.size() <= 60 &&
+      data.deviceType in ['phone', 'laptop', 'tv', 'console', 'iot', 'tablet', 'other'] &&
+      data.band in ['2.4GHz', '5GHz', 'LAN'] &&
+      data.rssi is number && data.rssi >= -120 && data.rssi <= 0 &&
+      data.online is bool &&
+      data.blocked is bool &&
+      data.trusted is bool &&
+      data.speedLimitDownMbps is number && data.speedLimitDownMbps >= 0 && data.speedLimitDownMbps <= 10000 &&
+      data.speedLimitUpMbps is number && data.speedLimitUpMbps >= 0 && data.speedLimitUpMbps <= 10000 &&
+      data.quotaLimitGb is number && data.quotaLimitGb >= 0 && data.quotaLimitGb <= 100000 &&
+      data.usedGb is number && data.usedGb >= 0 && data.usedGb <= 100000 &&
+      data.currentDownMbps is number && data.currentDownMbps >= 0 && data.currentDownMbps <= 10000 &&
+      data.currentUpMbps is number && data.currentUpMbps >= 0 && data.currentUpMbps <= 10000 &&
+      data.lastSeenAt is string && data.lastSeenAt.size() >= 1 && data.lastSeenAt.size() <= 40 &&
+      data.firstSeenAt is string && data.firstSeenAt.size() >= 1 && data.firstSeenAt.size() <= 40 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidNetworkAlert(data, expectedRouterId) {
+      return data.keys().hasAll([
+        'ownerId', 'routerId', 'type', 'title', 'message',
+        'deviceId', 'macAddress', 'ipAddress', 'read', 'severity', 'createdAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'routerId', 'type', 'title', 'message',
+        'deviceId', 'macAddress', 'ipAddress', 'read', 'severity', 'createdAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.routerId) &&
+      data.routerId == expectedRouterId &&
+      data.type in ['new_device', 'quota_warning', 'quota_exceeded', 'device_blocked', 'speed_throttled', 'security', 'parental_blocked'] &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+      data.message is string && data.message.size() >= 1 && data.message.size() <= 300 &&
+      isValidOptionalId(data.deviceId) &&
+      data.macAddress is string && data.macAddress.size() <= 24 &&
+      data.ipAddress is string && data.ipAddress.size() <= 45 &&
+      data.read is bool &&
+      data.severity in ['info', 'warning', 'critical'] &&
+      data.createdAt is timestamp;
+    }
+
+    function isValidParentalRule(data, expectedRouterId) {
+      return data.keys().hasAll([
+        'ownerId', 'routerId', 'targetType', 'targetId', 'targetName',
+        'blockAdultContent', 'safeSearchEnabled', 'blockGambling',
+        'blockSocialMedia', 'blockGaming', 'scheduleEnabled',
+        'bedtimeStart', 'bedtimeEnd', 'customBlockedDomains',
+        'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'routerId', 'targetType', 'targetId', 'targetName',
+        'blockAdultContent', 'safeSearchEnabled', 'blockGambling',
+        'blockSocialMedia', 'blockGaming', 'scheduleEnabled',
+        'bedtimeStart', 'bedtimeEnd', 'customBlockedDomains',
+        'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.routerId) &&
+      data.routerId == expectedRouterId &&
+      data.targetType in ['router', 'subscriber', 'device'] &&
+      isValidOptionalId(data.targetId) &&
+      data.targetName is string && data.targetName.size() >= 1 && data.targetName.size() <= 80 &&
+      data.blockAdultContent is bool &&
+      data.safeSearchEnabled is bool &&
+      data.blockGambling is bool &&
+      data.blockSocialMedia is bool &&
+      data.blockGaming is bool &&
+      data.scheduleEnabled is bool &&
+      isValidTimeHHMM(data.bedtimeStart) &&
+      isValidTimeHHMM(data.bedtimeEnd) &&
+      data.customBlockedDomains is list &&
+      data.customBlockedDomains.size() <= 30 &&
+      (data.customBlockedDomains.size() == 0 || (data.customBlockedDomains[0] is string && data.customBlockedDomains[0].size() >= 1 && data.customBlockedDomains[0].size() <= 120)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidDomainActivityLog(data, expectedRouterId) {
+      return data.keys().hasAll([
+        'ownerId', 'routerId', 'deviceId', 'deviceName', 'domain',
+        'category', 'status', 'requestsCount', 'dataUsedMb',
+        'lastVisitedAt', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'ownerId', 'routerId', 'deviceId', 'deviceName', 'domain',
+        'category', 'status', 'requestsCount', 'dataUsedMb',
+        'lastVisitedAt', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.routerId) &&
+      data.routerId == expectedRouterId &&
+      isValidId(data.deviceId) &&
+      data.deviceName is string && data.deviceName.size() >= 1 && data.deviceName.size() <= 80 &&
+      data.domain is string && data.domain.size() >= 3 && data.domain.size() <= 120 &&
+      data.category in ['video', 'social', 'work', 'gaming', 'education', 'adult', 'shopping', 'other'] &&
+      data.status in ['allowed', 'blocked'] &&
+      data.requestsCount is number && data.requestsCount >= 0 && data.requestsCount <= 1000000 &&
+      data.dataUsedMb is number && data.dataUsedMb >= 0 && data.dataUsedMb <= 1000000 &&
+      data.lastVisitedAt is string && data.lastVisitedAt.size() >= 1 && data.lastVisitedAt.size() <= 40 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Master Gate helper for router subcollections
+    function isRouterOwner(routerId) {
+      return isVerifiedUser() &&
+        exists(/databases/$(database)/documents/routers/$(routerId)) &&
+        get(/databases/$(database)/documents/routers/$(routerId)).data.ownerId == request.auth.uid;
+    }
+
+    // --- Collection Rules ---
+
+    // User Settings
+    match /userSettings/{userId} {
+      allow get: if isValidId(userId) && isOwnerUid(userId);
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() &&
+        isValidId(userId) &&
+        userId == request.auth.uid &&
+        isValidUserSettings(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser() &&
+        isValidId(userId) &&
+        userId == request.auth.uid &&
+        isValidUserSettings(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'displayName', 'notificationsEnabled', 'soundAlerts', 'activeRouterId', 'updatedAt'
+        ]);
+      allow delete: if isVerifiedUser() && isValidId(userId) && userId == request.auth.uid;
+    }
+
+    // Routers
+    match /routers/{routerId} {
+      allow get: if isValidId(routerId) && isSignedIn() && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow create: if isVerifiedUser() &&
+        isValidId(routerId) &&
+        isValidRouterProfile(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isVerifiedUser() &&
+        isValidId(routerId) &&
+        existing().ownerId == request.auth.uid &&
+        isValidRouterProfile(incoming()) &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'wifi24Enabled', 'wifi24Ssid', 'wifi24Channel', 'wifi24Hidden',
+            'wifi5Enabled', 'wifi5Ssid', 'wifi5Channel', 'wifi5Hidden',
+            'guestEnabled', 'guestSsid', 'guestSpeedLimitMbps',
+            'txPowerPercent', 'securityMode', 'wpsEnabled',
+            'newDeviceAlert', 'autoBlockUnknown', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'brandModel', 'gatewayIp',
+            'wanDownloadMbps', 'wanUploadMbps', 'monthlyQuotaGb', 'usedQuotaGb', 'billingDay',
+            'dnsPrimary', 'dnsSecondary', 'qosMode', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'usedQuotaGb', 'lineAttenuationDown', 'snrMarginDown', 'uptimeSeconds', 'updatedAt'
+          ])
+        );
+      allow delete: if isVerifiedUser() && isValidId(routerId) && existing().ownerId == request.auth.uid;
+
+      // Subscribers subcollection
+      match /subscribers/{subscriberId} {
+        allow get: if isValidId(routerId) && isValidId(subscriberId) && isRouterOwner(routerId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(subscriberId) &&
+          isValidSubscriberGroup(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(subscriberId) &&
+          isValidSubscriberGroup(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().routerId == existing().routerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time && (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'name', 'speedLimitMbps', 'uploadLimitMbps', 'quotaLimitGb', 'usedGb',
+              'priority', 'paused', 'scheduleEnabled', 'scheduleStart', 'scheduleEnd', 'updatedAt'
+            ])
+          );
+        allow delete: if isValidId(routerId) && isValidId(subscriberId) && isRouterOwner(routerId);
+      }
+
+      // Devices subcollection
+      match /devices/{deviceId} {
+        allow get: if isValidId(routerId) && isValidId(deviceId) && isRouterOwner(routerId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(deviceId) &&
+          isValidNetworkDevice(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(deviceId) &&
+          isValidNetworkDevice(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().routerId == existing().routerId &&
+          incoming().macAddress == existing().macAddress &&
+          incoming().firstSeenAt == existing().firstSeenAt &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time && (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'blocked', 'trusted', 'online', 'currentDownMbps', 'currentUpMbps', 'updatedAt'
+            ]) ||
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'name', 'deviceType', 'subscriberId', 'speedLimitDownMbps', 'speedLimitUpMbps',
+              'quotaLimitGb', 'trusted', 'blocked', 'updatedAt'
+            ]) ||
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'usedGb', 'currentDownMbps', 'currentUpMbps', 'online', 'rssi', 'lastSeenAt', 'updatedAt'
+            ])
+          );
+        allow delete: if isValidId(routerId) && isValidId(deviceId) && isRouterOwner(routerId);
+      }
+
+      // Alerts subcollection
+      match /alerts/{alertId} {
+        allow get: if isValidId(routerId) && isValidId(alertId) && isRouterOwner(routerId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(alertId) &&
+          isValidNetworkAlert(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().createdAt == request.time;
+        allow update: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(alertId) &&
+          isValidNetworkAlert(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().routerId == existing().routerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['read']);
+        allow delete: if isValidId(routerId) && isValidId(alertId) && isRouterOwner(routerId);
+      }
+
+      // Parental Control & Content Filtering Rules subcollection
+      match /parentalRules/{ruleId} {
+        allow get: if isValidId(routerId) && isValidId(ruleId) && isRouterOwner(routerId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(ruleId) &&
+          isValidParentalRule(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(ruleId) &&
+          isValidParentalRule(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().routerId == existing().routerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time && (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'targetType', 'targetId', 'targetName',
+              'blockAdultContent', 'safeSearchEnabled', 'blockGambling',
+              'blockSocialMedia', 'blockGaming', 'scheduleEnabled',
+              'bedtimeStart', 'bedtimeEnd', 'customBlockedDomains', 'updatedAt'
+            ])
+          );
+        allow delete: if isValidId(routerId) && isValidId(ruleId) && isRouterOwner(routerId);
+      }
+
+      // Per-Device Domain Activity Logs subcollection
+      match /domainLogs/{logId} {
+        allow get: if isValidId(routerId) && isValidId(logId) && isRouterOwner(routerId);
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+        allow create: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(logId) &&
+          isValidDomainActivityLog(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time;
+        allow update: if isVerifiedUser() &&
+          isValidId(routerId) &&
+          isValidId(logId) &&
+          isValidDomainActivityLog(incoming(), routerId) &&
+          isRouterOwner(routerId) &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().routerId == existing().routerId &&
+          incoming().deviceId == existing().deviceId &&
+          incoming().domain == existing().domain &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time && (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'status', 'requestsCount', 'dataUsedMb', 'lastVisitedAt', 'updatedAt'
+            ])
+          );
+        allow delete: if isValidId(routerId) && isValidId(logId) && isRouterOwner(routerId);
+      }
+    }
+  }
+}
