@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import RouterLogin, { RouterAuthData } from './RouterLogin';
+import RouterLogin from './RouterLogin';
+import { RouterLiveInfo } from './services/routerTypes';
 
 export default function App() {
-  const [routerAuth, setRouterAuth] = useState<RouterAuthData | null>(null);
+  const [routerInfo, setRouterInfo] = useState<RouterLiveInfo | null>(null);
 
-  if (!routerAuth) {
-    return <RouterLogin onLogin={(authData) => setRouterAuth(authData)} />;
+  if (!routerInfo) {
+    return <RouterLogin onLogin={(info) => setRouterInfo(info)} />;
   }
 
   return (
@@ -18,21 +19,42 @@ export default function App() {
         fontFamily: 'Cairo, sans-serif',
       }}
     >
-      <h1>مرحباً بك في لوحة تحكم RouterCraft</h1>
+      <h1>لوحة تحكم RouterCraft (بيانات حقيقية)</h1>
       <p>
-        تم الاتصال بنجاح بالراوتر على الإيبي: <strong>{routerAuth.ip}</strong>
+        عنوان الراوتر (IP): <strong>{routerInfo.ip}</strong>
       </p>
       <p>
-        المستخدم: <strong>{routerAuth.username}</strong>
+        المستخدم: <strong>{routerInfo.username}</strong>
       </p>
-      {routerAuth.endpointUsed && (
-        <p style={{ fontSize: '13px', color: '#aaa' }}>
-          مسار الاتصال الفعلي: <code>{routerAuth.endpointUsed}</code>
+      <p>
+        المشغّل المستخدم: <strong>{routerInfo.driverName}</strong>
+      </p>
+      {routerInfo.detectedVendorOrModel && (
+        <p>
+          الشركة / الموديل المكتشف: <strong>{routerInfo.detectedVendorOrModel}</strong>
         </p>
+      )}
+      <p style={{ fontSize: '13px', color: '#aaa' }}>
+        مسار الاتصال الفعلي: <code>{routerInfo.endpointUsed}</code>
+      </p>
+      {routerInfo.responseSnippet && (
+        <pre
+          style={{
+            marginTop: '14px',
+            padding: '12px',
+            background: '#1e1e1e',
+            borderRadius: '6px',
+            overflowX: 'auto',
+            fontSize: '12px',
+            color: '#ccc',
+          }}
+        >
+          {routerInfo.responseSnippet}
+        </pre>
       )}
 
       <button
-        onClick={() => setRouterAuth(null)}
+        onClick={() => setRouterInfo(null)}
         style={{
           marginTop: '16px',
           padding: '10px 18px',
