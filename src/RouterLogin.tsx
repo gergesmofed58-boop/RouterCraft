@@ -1,28 +1,9 @@
 import React, { useState } from 'react';
-
-export interface RouterAuthData {
-  ip: string;
-  username: string;
-  password: string;
-  endpointUsed?: string;
-}
+import { connectToRouter } from './services/routerService';
+import { RouterLiveInfo } from './services/routerTypes';
 
 interface RouterLoginProps {
-  onLogin: (authData: RouterAuthData) => void;
-}
-
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-  timeoutMs = 5000
-): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+  onLogin: (routerInfo: RouterLiveInfo) => void;
 }
 
 export default function RouterLogin({ onLogin }: RouterLoginProps) {
@@ -34,89 +15,23 @@ export default function RouterLogin({ onLogin }: RouterLoginProps) {
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanIp = ip.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
-    const cleanUser = username.trim() || 'admin';
-
-    if (!cleanIp) {
-      setError('يرجى إدخال عنوان IP صحيح للراوتر.');
-      return;
-    }
-
     setLoading(true);
     setError('');
 
-    const baseUrl = `http://${cleanIp}`;
-    const basicToken = btoa(`${cleanUser}:${password}`);
+    const result = await connectToRouter({
+      ip,
+      username,
+      password,
+    });
 
-    // 1. التحقق أولاً أن الراوتر قابل للوصول على الشبكة المحلية
-    try {
-      await fetchWithTimeout(`${baseUrl}/`, {
-        method: 'GET',
-        mode: 'no-cors',
-      });
-    } catch {
-      setError(
-        `تعذر الوصول إلى ${cleanIp}. تأكد أنك متصل بشبكة Wi-Fi الخاصة بالراوتر وأن عنوان IP صحيح.`
-      );
-      setLoading(false);
+    setLoading(false);
+
+    if (result.ok && result.info) {
+      onLogin(result.info);
       return;
     }
 
-    // 2. محاولة المصادقة عبر مسارات شائعة
-    const loginAttempts: Array<{ url: string; init: RequestInit }> = [
-      {
-        url: `${baseUrl}/api/login`,
-        init: {
-          method: 'POST',
-          headers: {
-            Authorization: `Basic ${basicToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username: cleanUser, password }),
-        },
-      },
-      {
-        url: `${baseUrl}/`,
-        init: {
-          method: 'GET',
-          headers: {
-            Authorization: `Basic ${basicToken}`,
-          },
-        },
-      },
-    ];
-
-    let anyReachableAuthResponse = false;
-
-    for (const attempt of loginAttempts) {
-      try {
-        const res = await fetchWithTimeout(attempt.url, attempt.init);
-        anyReachableAuthResponse = true;
-
-        if (res.ok && res.status !== 401 && res.status !== 403) {
-          onLogin({
-            ip: cleanIp,
-            username: cleanUser,
-            password,
-            endpointUsed: attempt.url,
-          });
-          setLoading(false);
-          return;
-        }
-      } catch {
-        // قد تفشل بعض المسارات بسبب اختلاف بنية الراوتر أو CORS في المتصفح
-      }
-    }
-
-    if (anyReachableAuthResponse) {
-      setError('اسم المستخدم أو كلمة المرور غير صحيحة أو الراوتر يطلب طريقة مصادقة خاصة به.');
-    } else {
-      setError(
-        'تم العثور على الراوتر، لكن واجهة الدخول لهذا الموديل تتطلب مشغلاً (Driver) مخصصاً أو فحص طلب الدخول الحقيقي.'
-      );
-    }
-
-    setLoading(false);
+    setError(result.message);
   };
 
   return (
