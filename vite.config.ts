@@ -15,7 +15,7 @@ export default defineConfig({
         id: '/',
 scope: '/',
 start_url: '/',
-        start_url: './',
+        
         categories: ['utilities', 'productivity'],
         icons: [
           {
