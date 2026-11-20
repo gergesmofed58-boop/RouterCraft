@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: './',
+  base: '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -12,17 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
-        id: './',
-        name: 'RouterCraft — راوتر كرافت',
-        short_name: 'RouterCraft',
-        description: 'لوحة تحكم أندرويد متكاملة لإدارة شبكة الواي فاي والراوتر، تقسيم السرعة والجيجات، الرقابة الأبوية، وحظر المتطفلين.',
-        theme_color: '#0f766e',
-        background_color: '#0f172a',
-        display: 'standalone',
-        orientation: 'portrait',
-        dir: 'rtl',
-        lang: 'ar',
-        scope: './',
+        id: '/',
+scope: '/',
+start_url: '/',
         start_url: './',
         categories: ['utilities', 'productivity'],
         icons: [
