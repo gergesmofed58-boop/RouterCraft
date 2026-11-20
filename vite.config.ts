@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/RouterCraft/',
+  base: './',
   plugins: [
     react(),
     tailwindcss(),
@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'apple-touch-icon.png'],
       manifest: {
-        id: '/RouterCraft/',
+        id: './',
         name: 'RouterCraft — راوتر كرافت',
         short_name: 'RouterCraft',
         description: 'لوحة تحكم أندرويد متكاملة لإدارة شبكة الواي فاي والراوتر، تقسيم السرعة والجيجات، الرقابة الأبوية، وحظر المتطفلين.',
@@ -22,24 +22,24 @@ export default defineConfig({
         orientation: 'portrait',
         dir: 'rtl',
         lang: 'ar',
-        scope: '/RouterCraft/',
-        start_url: '/RouterCraft/',
+        scope: './',
+        start_url: './',
         categories: ['utilities', 'productivity'],
         icons: [
           {
-            src: '/RouterCraft/pwa-192x192.png',
+            src: './pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/RouterCraft/pwa-512x512.png',
+            src: './pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any',
           },
           {
-            src: '/RouterCraft/pwa-maskable-512x512.png',
+            src: './pwa-maskable-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
